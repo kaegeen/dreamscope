@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DreamScope</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen p-6 font-sans text-gray-900">
+  <div class="max-w-xl mx-auto">
+    <h1 class="text-3xl font-bold mb-4">DreamScope</h1>
+    <div class="bg-white p-4 rounded shadow">
+      <textarea id="dreamInput" class="w-full border p-2 rounded" rows="5" placeholder="Describe your dream..."></textarea>
+      <button onclick="analyzeDream()" class="mt-3 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Analyze</button>
+    </div>
+    <div class="mt-6" id="dreamAnalysis"></div>
+    <div class="mt-6" id="dreamHistory">
+      <h2 class="text-xl font-semibold mb-2">Dream History</h2>
+      <ul id="dreamList" class="space-y-2"></ul>
+    </div>
+  </div>
+
+  <script>
+    const symbols = {
+      falling: "Loss of control or insecurity",
+      water: "Emotions or unconscious mind",
+      teeth: "Stress or fear of aging",
+      flying: "Desire for freedom or escape",
+      chased: "Avoidance or anxiety",
+      fire: "Anger or transformation",
+      snake: "Hidden fears or temptations"
+    };
+
+    function analyzeDream() {
+      const text = document.getElementById("dreamInput").value.toLowerCase();
+      const matchedSymbols = Object.keys(symbols).filter(sym => text.includes(sym));
+      const analysisDiv = document.getElementById("dreamAnalysis");
+
+      const resultHTML = matchedSymbols.length
+        ? matchedSymbols.map(sym => `<div class="p-2 bg-blue-100 rounded my-1"><strong>${sym}:</strong> ${symbols[sym]}</div>`).join("")
+        : `<div class="text-gray-600">No known symbols detected. Try using specific dream elements.</div>`;
+
+      analysisDiv.innerHTML = `<h2 class="text-xl font-semibold mb-2">Analysis</h2>${resultHTML}`;
+
+      const entry = {
+        date: new Date().toLocaleDateString(),
+        text,
+        matched: matchedSymbols
+      };
+
+      const history = JSON.parse(localStorage.getItem("dreams")) || [];
+      history.push(entry);
+      localStorage.setItem("dreams", JSON.stringify(history));
+      document.getElementById("dreamInput").value = "";
+      loadHistory();
+    }
+
+    function loadHistory() {
+      const dreams = JSON.parse(localStorage.getItem("dreams")) || [];
+      const dreamList = document.getElementById("dreamList");
+      dreamList.innerHTML = dreams.map(d => `
+        <li class="bg-white p-3 rounded shadow">
+          <strong>${d.date}</strong><br>${d.text}<br>
+          <em>${d.matched.join(", ")}</em>
+        </li>
+      `).join("");
+    }
+
+    loadHistory();
+  </script>
+</body>
+</html>
